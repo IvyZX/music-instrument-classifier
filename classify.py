@@ -2,18 +2,9 @@ import numpy as np
 from sklearn import svm
 from sklearn import decomposition
 from sklearn import neighbors
+from sklearn.externals import joblib
 
-def read_data():
-    # to be filled
-    # data should be of length n (n = number of audio pieces),
-    #    and for each line, it contains three elements for an audio piece:
-    #        [audio_file_name, feature_vector, label]
-    #    in which label should be an integer representing this instrument,
-    #    and audio_file_name is something that can help us identify this piece
-    # label_detail is a dictionary that links a label number with the actual instrument,
-    #    something like {'violin': 0, 'piano': 1}
-    data, label_detail = [], []
-    return data, label_detail
+import preprocessing
 
 
 def unpack_data(data):
@@ -40,8 +31,8 @@ def train_and_test(data, method, cv_fold=10):
     print accu_rates
     print 'average: ', np.average(accu_rates)
     # cache the best model
-    # best = models[np.argmax(accu_rates)]
-    # save_model(best)
+    best = models[np.argmax(accu_rates)]
+    save_model(best)
     return models, np.average(accu_rates)
 
 
@@ -52,31 +43,31 @@ def train(data, method):
     # initialize models (not all used)
     params = method[0]
     pca = decomposition.PCA(n_components=params['pca_n'])
-    svm = svm.LinearSVC()
-    knn = neighbors.KNeighborsClassifier(n_neighbor=params['knn_k'], metric=params['knn_metric'])
+    svc = svm.LinearSVC()
+    knn = neighbors.KNeighborsClassifier(n_neighbors=params['knn_k'], metric=params['knn_metric'])
 
     if 'pca' in method:
         features = pca.fit_transform(features)
 
-    if 'svm' in method:
-        svm.fit(features, labels)
+    if 'svc' in method:
+        svc.fit(features, labels)
 
     if 'knn' in method:
         knn.fit(features, labels)
 
-    return pca, svm, knn
+    return pca, svc, knn
 
 
 def predict(model, features, method):
-    pca, svm, knn = model
+    pca, svc, knn = model
     params = method[0]
     if 'pca' in method:
         features = pca.transform(features)
-    if 'svm' in method:
-        predicted = svm.predict(features)
+    if 'svc' in method:
+        predicted = svc.predict(features)
         return predicted
     if 'knn' in method:
-        predicted = knn.predict(features, labels)
+        predicted = knn.predict(features)
         return predicted
     print 'error: no classification method specified'
     return []
@@ -102,13 +93,31 @@ def test(model, data, method):
     return accu_rate
 
 
+def save_model(model):
+    pca, svc, knn = model
+    joblib.dump(svc, 'last_svc.model')
+    return
+
+def load_model(params):
+    svc = joblib.load('last_svc.model')
+
+    pca = decomposition.PCA(n_components=params['pca_n'])
+    knn = neighbors.KNeighborsClassifier(n_neighbors=params['knn_k'], metric=params['knn_metric'])
+
+    return pca, svc, knn
+
+
 def main():
-    data, label_detail = read_data()
+    data = preprocessing.feature_extract()
+    print 'processed data.'
     model_params = {
-        'pca_n': 100,
+        'pca_n': 10,
         'knn_k': 5,
         'knn_metric': 'minkowski'
     }
-    train_and_test(data, [model_params, 'pca', 'svm'])
+    # train_and_test(data, [model_params, 'svc'])
+    model = load_model(model_params)
+    test(model, data, [model_params, 'svc'])
 
-main()
+if __name__ == '__main__':
+    main()
