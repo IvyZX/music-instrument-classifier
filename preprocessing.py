@@ -1,7 +1,6 @@
 import numpy as np
 import sklearn
 import librosa
-from IPython.display import Audio
 import glob
 
 def detect_leading_silence(sound, silence_threshold=.001, chunk_size=10):
