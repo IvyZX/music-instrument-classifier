@@ -13,7 +13,6 @@ def feature_extract(audio_filename):
     sr = 44100
     window_size = 2048
     hop_size = window_size/2
-    print audio_filename
     if audio_filename[5] == '1':
         print "This instrument is cello."
     elif audio_filename[5] == '2':
