@@ -2,8 +2,7 @@
 
 This is a simple classifier that is able to detect single-note sounds of various musical instruments.
 
-Currently supported types are cello, clarinet, flute and violin. Piano will be supported soon. 
-
+Currently supported types are cello, clarinet, flute, violin and Piano.
 
 ## Dataset
 
