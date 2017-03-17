@@ -56,6 +56,8 @@ In addition to the code for training, this repository also includes a pre-traine
 
 After that, type in the audio file path that you want to classify. It will output the musical instrument that it recognized in the audio. 
 
+We also have a short video of this demo here: https://youtu.be/NSV8a49cqXU
+
 
 ## Related Papers
 
